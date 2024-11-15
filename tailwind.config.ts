@@ -12,6 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      screens: { vsm: { min: "400px" } },
     },
   },
   plugins: [],
