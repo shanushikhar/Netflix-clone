@@ -1,5 +1,10 @@
 import React, { useCallback, useState } from "react";
+import axios from "axios";
+import { signIn } from "next-auth/react";
 import Input from "@/components/Input";
+
+import { FcGoogle } from "react-icons/fc";
+import { FaGithub } from "react-icons/fa";
 
 export default function auth() {
   const [email, setEmail] = useState("");
@@ -12,6 +17,32 @@ export default function auth() {
       currentVarient === "login" ? "register" : "login"
     );
   }, []);
+
+  const handleLogin = useCallback(async () => {
+    try {
+      await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/profiles",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }, [email, password]);
+
+  const handleRegister = useCallback(async () => {
+    try {
+      await axios.post("/api/register", {
+        email,
+        name: userName,
+        password,
+      });
+
+      handleLogin();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [email, userName, password, handleLogin]);
 
   return (
     <div className="relative h-full w-full bg-[url('/images/background.jpg')] bg-no-repeat bg-center bg-fixed bg-cover">
@@ -50,10 +81,29 @@ export default function auth() {
                 type="password"
               />
             </div>
-            <button className="bg-red-600 text-white py-3 rounded-md w-full mt-10 hover:bg-red-700 transition">
+            <button
+              onClick={varient === "login" ? handleLogin : handleRegister}
+              className="bg-red-600 text-white py-3 rounded-md w-full mt-10 hover:bg-red-700 transition"
+            >
               {varient === "login" ? "Login" : "Sign up"}
             </button>
-            <p className="mt-12 text-neutral-500 ">
+
+            <div className="flex flex-row justify-center mt-8 gap-10">
+              <div
+                onClick={() => signIn("google", { callbackUrl: "/profiles" })}
+                className="w-10 h-10 bg-white rounded-full hover:opacity-80 cursor-pointer transform flex justify-center items-center"
+              >
+                <FcGoogle size={30} />
+              </div>
+              <div
+                onClick={() => signIn("github", { callbackUrl: "/profiles" })}
+                className="w-10 h-10 bg-white rounded-full hover:opacity-80 cursor-pointer transform flex justify-center items-center"
+              >
+                <FaGithub size={30} />
+              </div>
+            </div>
+
+            <p className="mt-8 text-neutral-500 ">
               {varient === "login"
                 ? "First time using Netflix?"
                 : "Already have an account?"}
